@@ -5,7 +5,7 @@ C library to verify a blob against a DSA public key and a DSA signature. Aims at
 
 Key generation
 --------------
-A DSA public key consists of parameters G, P, Q and Y; they are defined in `dsa_verify.h`. Using ssh-keygen and openssl a key can be generated and the parameters can be obtained. The included `openssl_to_c.pl` script can convert them to c-directives.
+Using ssh-keygen and openssl a key can be generated and the parameters can be obtained. The included `openssl_to_c.pl` script can convert them to a C-style array initializer.
 
 	ssh-keygen -t dsa # (optionally) supply a password, save to distribution.dsa
 	openssl dsa -in distribution.dsa -noout -text | ./openssl_to_c.pl
@@ -22,13 +22,7 @@ Note that the dss1 hashing algorithm is actually just sha1.
 
 Verification
 ------------
-In your application, you should obtain the binary blob and parameters R and S. You can then verify the blob using the function `dsa_verify_binary`. It returns 1 when the blob is untampered.
-
-Public key in source
---------------------
-The source code includes a public key and signature for the following private key:
-
-	00:dc:78:60:20:56:9d:9c:4b:bd:32:f6:00:89:63:ce:ab:dc:0c:44:c8
+In your application, you should obtain the binary blob and parameters R and S. You can then verify the blob using the function `dsa_verify_binary`. It's `keyData` argument takes a pointer to the structure spit out by `openssl_to_c.pl`. The function returns 1 when the blob is untampered.
 
 Compilation
 -----------

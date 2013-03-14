@@ -40,17 +40,23 @@
 #     6b:18:ce:5a:69:8b:84:d2:5a
 #
 
-%keys = ('pub' => 'Y', 'G' => 'G', 'P' => 'P', 'Q' => 'Q');
+%data = ();
 
 $_ = join("", (<>));
-while ( /\n([a-zA-Z]+?):\s*([0-9a-f:\s]*?)(?=(\n[a-zA-Z])|$)/g )
-{
-	$key = $1;
-	if (%keys->{$key}) {
-		$hex = $2;
-		$hex =~ s/\s*//g; # drop spaces
-		$hex =~ s/:/, 0x/g; # convert to c hex defs
-		$hex =~ s/((.*?\s){16})/$1\n\t/g; # group in hextets
-		print "static const unsigned char DSA_KEY_". %keys->{$key} . "[] = {\n\t0x$hex };\n\n";
-	}
+while ( /\n([a-zA-Z]+?):\s*([0-9a-f:\s]*?)(?=(\n[a-zA-Z])|$)/g ) {
+	$data{$1} = $2;
 }
+
+@parts = ('pub', 'P', 'Q', 'G');
+print "{\n";
+foreach $part (@parts) {
+	$hex = $data{$part};
+	$hex =~ s/\s*//g; # drop spaces
+	$length = 1 + ($hex =~ tr/://);
+	$hex =~ s/:/, 0x/g; # convert to c hex defs
+	$hex =~ s/((.*?\s){16})/$1\n\t/g; # group in hextets
+	$hex = $hex.',' if $part ne "G";
+	printf("\t/* %s (%d bytes) */\n\t0x%x, 0x%x,\n\t0x%s\n", $part, $length, $length>>8, $length&255, $hex);
+}
+print "}\n";
+
