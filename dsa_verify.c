@@ -16,23 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-
 #include "mp_math.h"
 #include "sha1.h"
 
 #include "dsa_verify.h"
 
 #define MP_OP(op) if ((ret = (op)) != MP_OKAY) goto error;
-
-/*char *debugMp (mp_int *d)
-{
-	char *ret = malloc(1024); // leak leak
-	mp_tohex(d, ret);
-	return ret;
-}*/
 
 int _dsa_verify_hash (mp_int *r, mp_int *s, mp_int *hash,
 		mp_int *keyG, mp_int *keyP, mp_int *keyQ, mp_int *keyY)
@@ -102,33 +91,3 @@ int dsa_verify_blob(const char *data, int dataLen, const unsigned char* keyData,
 	
 	return _dsa_verify_hash(&r, &s, &hash, &keyG, &keyP, &keyQ, &keyY);
 }
-
-#ifdef TEST
-
-extern const uint8_t public_key[];
-extern const char*   r_sig;
-extern const char*   s_sig;
-
-char msg[256];
-
-int main()
-{
-	int dsa_status;
-	int msg_len;
-	FILE* f_in;
-
-	memset(msg, 0, sizeof(msg));
-
-	f_in = fopen("message.txt", "rb");
-	if (f_in == NULL) {
-		printf("fopen failed: %s\n", strerror(errno));
-	} else {
-		msg_len = fread(msg, 1, 256, f_in);
-		fclose(f_in);
-	}
-
-	dsa_status = dsa_verify_blob(msg, msg_len, public_key, r_sig, s_sig);
-	printf("dsa status: %d\n", dsa_status);
-}
-
-#endif

@@ -1,15 +1,32 @@
 #-------------------------------------------------------------------------------
-#	Makefile for dsa_verify
+#	Makefile for dsa.a and test applications
 #-------------------------------------------------------------------------------
-CC = gcc
-CFLAGS = -Wall -Werror -ggdb -DTEST
+CC			= gcc
+CFLAGS		= -Wall -Werror -ggdb
+ARFLAGS 	= rcu
 
-dsa_verify:	dsa_verify.o sha1.o mp_math.o pub_key_2.o
-
-test_sha1:	test_sha1.o sha1.o
+DSA_OBJS	= dsa_verify.o sha1.o mp_math.o
+#-------------------------------------------------------------------------------
+#	Meta targets
+#-------------------------------------------------------------------------------
+all:	dsa.a test_dsa test_sha1
 
 clean:
 	$(RM) *.o
+	$(RM) dsa.a
 	$(RM) test_sha1.exe
-	$(RM) dsa_verify.exe
-	
+	$(RM) test_dsa.exe
+
+#-------------------------------------------------------------------------------
+#	library target
+#-------------------------------------------------------------------------------
+dsa.a:	$(DSA_OBJS)
+		$(AR) $(ARFLAGS) $@ $+
+		ranlib $@
+
+#-------------------------------------------------------------------------------
+#	Test targets
+#-------------------------------------------------------------------------------
+test_dsa:	test_dsa.o pub_key_2.o dsa.a
+
+test_sha1:	test_sha1.o dsa.a
